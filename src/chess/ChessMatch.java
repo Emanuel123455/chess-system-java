@@ -90,6 +90,7 @@ public class ChessMatch {
 		Position target = targetPosition.toPosition();
 		validateSourcePosition(source);
 		validateTargetPosition(source, target);
+		validateCastleThroughCheck(source, target);
 		Piece capturedPiece = makeMove(source, target);
 
 		if (testCheck(currentPlayer)) {
@@ -274,6 +275,28 @@ public class ChessMatch {
 	private void validateTargetPosition(Position source, Position target) {
 		if (!board.piece(source).possibleMove(target)) {
 			throw new ChessException("The chosen piece can't move to target position");
+		}
+	}
+
+	// A king may not castle across a square that is under attack. The starting
+	// square is already handled (King.possibleMoves won't offer castling while in
+	// check) and the landing square is caught by the general self-check guard
+	// after the move; this fills the remaining gap — the square the king passes
+	// over. We simulate the king one step toward the rook and test for check.
+	private void validateCastleThroughCheck(Position source, Position target) {
+		ChessPiece p = (ChessPiece) board.piece(source);
+		if (!(p instanceof King) || Math.abs(target.getColumn() - source.getColumn()) != 2) {
+			return;
+		}
+		int step = (target.getColumn() > source.getColumn()) ? 1 : -1;
+		Position middle = new Position(source.getRow(), source.getColumn() + step);
+		Piece king = board.removePiece(source);
+		board.placePiece(king, middle);
+		boolean middleAttacked = testCheck(currentPlayer);
+		board.removePiece(middle);
+		board.placePiece(king, source);
+		if (middleAttacked) {
+			throw new ChessException("You can't castle across a square that is under attack");
 		}
 	}
 
