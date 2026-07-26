@@ -32,8 +32,10 @@ No framework, no build tool — plain Java, compiled directly with `javac`.
 - Turn enforcement ("the chosen piece is not yours")
 - Check and checkmate detection, including "you can't put yourself in check"
 - Captured-pieces tracking, shown by color
-- Special moves: **castling** (both sides), **en passant**, **pawn promotion** (choose Bishop/Knight/Rook/Queen)
-- Colored terminal output (white vs. black pieces) and move highlighting on the board
+- Special moves: **castling** (respecting all conditions — can't castle out of, through, or into check), **en passant**, **pawn promotion** (choose Bishop/Knight/Rook/Queen)
+- **All draw conditions**: stalemate, insufficient material (dead position), threefold repetition, and the fifty-move rule
+- **Resign** and **draw-by-agreement** commands
+- Per-piece-type colors (king red, queen magenta, rook blue, bishop green, knight cyan, pawn gray) with side shown by letter case, plus move highlighting
 - Clean exception handling — invalid input never crashes the game
 
 ## ▶️ How to run
@@ -73,7 +75,6 @@ Each turn: type the **source** square, then the **target** square, in algebraic 
 Ideas for extending this beyond the training scope:
 
 - Move history / algebraic notation log (PGN export)
-- Stalemate and draw detection (insufficient material, threefold repetition, 50-move rule)
 - A simple AI opponent (minimax + evaluation function)
 - Graphical UI (JavaFX/Swing) instead of the console
 - Save/load game state

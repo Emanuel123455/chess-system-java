@@ -42,6 +42,12 @@ Target: e4      ← para onde ela vai
 Depois de digitar a origem, o tabuleiro é reimpresso com os destinos possíveis
 daquela peça **destacados em azul**, antes de você confirmar o destino.
 
+No lugar de uma casa de origem, você também pode digitar um **comando**:
+
+- `resign` — você desiste; o adversário vence.
+- `draw` — você propõe empate; o adversário responde `y` (aceita) ou `n` (recusa,
+  e o jogo continua).
+
 ### O tabuleiro
 
 - Cada **tipo** de peça tem uma cor própria:
@@ -78,6 +84,19 @@ daquela peça **destacados em azul**, antes de você confirmar o destino.
   você fazer uma jogada que deixe (ou mantenha) seu próprio rei em xeque.
 - Quando não há mais saída, aparece `CHECKMATE!` e o vencedor, e o jogo
   termina.
+
+### Empates
+
+O jogo declara empate automaticamente (`DRAW!`) nos casos das regras oficiais:
+
+- **Afogamento (stalemate):** o jogador da vez não está em xeque, mas não tem
+  nenhum lance legal.
+- **Material insuficiente:** não há material para dar mate (ex.: Rei×Rei,
+  Rei+Bispo×Rei, Rei+Cavalo×Rei).
+- **Repetição tripla:** a mesma posição ocorre pela terceira vez.
+- **Regra dos 50 lances:** 50 lances de cada lado sem captura nem movimento de
+  peão.
+- **Acordo:** os dois jogadores concordam (via comando `draw`).
 
 ### Erros de digitação
 
