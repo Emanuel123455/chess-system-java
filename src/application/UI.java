@@ -1,9 +1,12 @@
 package application;
 
+import java.util.Arrays;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 import chess.ChessException;
+import chess.ChessMatch;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import chess.Color;
@@ -39,6 +42,25 @@ public class UI {
 		catch (StringIndexOutOfBoundsException | NumberFormatException | ChessException e) {
 			throw new InputMismatchException("Error reading ChessPosition. Valid values are from a1 to h8.");
 		}
+	}
+
+	public static void printMatch(ChessMatch chessMatch) {
+		printBoard(chessMatch.getPieces());
+		System.out.println();
+		printCapturedPieces(chessMatch);
+		System.out.println();
+		System.out.println("Turn: " + chessMatch.getTurn());
+		System.out.println("Waiting player: " + chessMatch.getCurrentPlayer());
+	}
+
+	private static void printCapturedPieces(ChessMatch chessMatch) {
+		List<ChessPiece> white = chessMatch.getCapturedPieces(Color.WHITE);
+		List<ChessPiece> black = chessMatch.getCapturedPieces(Color.BLACK);
+		System.out.println("Captured pieces:");
+		System.out.print("White: ");
+		System.out.println(Arrays.toString(white.toArray()));
+		System.out.print("Black: ");
+		System.out.println(Arrays.toString(black.toArray()));
 	}
 
 	public static void printBoard(ChessPiece[][] pieces) {
