@@ -131,6 +131,11 @@ public class ChessMatch {
 			nextTurn();
 		}
 
+		if (!checkMate && !draw && insufficientMaterial()) {
+			draw = true;
+			drawReason = "Insufficient material";
+		}
+
 		// en passant vulnerability: only a two-square pawn advance opens the window
 		if (movedPiece instanceof Pawn
 				&& (target.getRow() == source.getRow() - 2 || target.getRow() == source.getRow() + 2)) {
@@ -379,6 +384,40 @@ public class ChessMatch {
 
 	private boolean testStaleMate(Color color) {
 		return !testCheck(color) && !hasAnyLegalMove(color);
+	}
+
+	// Draw by "dead position": neither side has enough material to force mate.
+	// Standard auto-draw set: K vs K, K + one minor (bishop/knight) vs K, and
+	// K+B vs K+B with both bishops on same-colored squares. Any pawn, rook or
+	// queen on the board means there is enough material, so it is not a draw.
+	private boolean insufficientMaterial() {
+		List<ChessPiece> minors = new ArrayList<>();
+		for (Piece piece : piecesOnTheBoard) {
+			ChessPiece p = (ChessPiece) piece;
+			if (p instanceof Pawn || p instanceof Rook || p instanceof Queen) {
+				return false;
+			}
+			if (p instanceof Bishop || p instanceof Knight) {
+				minors.add(p);
+			}
+		}
+		if (minors.size() <= 1) {
+			return true;
+		}
+		if (minors.size() == 2) {
+			ChessPiece a = minors.get(0);
+			ChessPiece b = minors.get(1);
+			if (a instanceof Bishop && b instanceof Bishop && a.getColor() != b.getColor()
+					&& squareParity(a) == squareParity(b)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private int squareParity(ChessPiece piece) {
+		Position pos = piece.getChessPosition().toPosition();
+		return (pos.getRow() + pos.getColumn()) % 2;
 	}
 
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
