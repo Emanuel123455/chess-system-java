@@ -20,7 +20,7 @@ public class Program {
 				UI.clearScreen();
 				UI.printMatch(chessMatch);
 
-				if (chessMatch.getCheckMate()) {
+				if (chessMatch.getCheckMate() || chessMatch.getDraw()) {
 					break;
 				}
 

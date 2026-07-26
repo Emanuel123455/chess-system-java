@@ -21,6 +21,8 @@ public class ChessMatch {
 	private Board board;
 	private boolean check;
 	private boolean checkMate;
+	private boolean draw;
+	private String drawReason;
 	private ChessPiece enPassantVulnerable;
 	private ChessPiece promoted;
 
@@ -48,6 +50,14 @@ public class ChessMatch {
 
 	public boolean getCheckMate() {
 		return checkMate;
+	}
+
+	public boolean getDraw() {
+		return draw;
+	}
+
+	public String getDrawReason() {
+		return drawReason;
 	}
 
 	public ChessPiece getEnPassantVulnerable() {
@@ -114,6 +124,9 @@ public class ChessMatch {
 
 		if (testCheckMate(opponent(currentPlayer))) {
 			checkMate = true;
+		} else if (testStaleMate(opponent(currentPlayer))) {
+			draw = true;
+			drawReason = "Stalemate";
 		} else {
 			nextTurn();
 		}
@@ -333,10 +346,11 @@ public class ChessMatch {
 		return false;
 	}
 
-	private boolean testCheckMate(Color color) {
-		if (!testCheck(color)) {
-			return false;
-		}
+	// True if `color` has at least one move that does not leave its own king in
+	// check. Shared by checkmate (in check + no legal move) and stalemate (not in
+	// check + no legal move); the piece move generators produce pseudo-legal
+	// moves, so each candidate is simulated and checked here.
+	private boolean hasAnyLegalMove(Color color) {
 		List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece) x).getColor() == color)
 				.collect(Collectors.toList());
 		for (Piece p : list) {
@@ -350,13 +364,21 @@ public class ChessMatch {
 						boolean stillInCheck = testCheck(color);
 						undoMove(source, target, capturedPiece);
 						if (!stillInCheck) {
-							return false;
+							return true;
 						}
 					}
 				}
 			}
 		}
-		return true;
+		return false;
+	}
+
+	private boolean testCheckMate(Color color) {
+		return testCheck(color) && !hasAnyLegalMove(color);
+	}
+
+	private boolean testStaleMate(Color color) {
+		return !testCheck(color) && !hasAnyLegalMove(color);
 	}
 
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
