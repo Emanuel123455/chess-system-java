@@ -47,9 +47,16 @@ public class UI {
 		return type;
 	}
 
+	public static String readLine(Scanner sc) {
+		return sc.nextLine();
+	}
+
 	public static ChessPosition readChessPosition(Scanner sc) {
+		return parseChessPosition(sc.nextLine());
+	}
+
+	public static ChessPosition parseChessPosition(String s) {
 		try {
-			String s = sc.nextLine();
 			char column = s.charAt(0);
 			int row = Integer.parseInt(s.substring(1));
 			return new ChessPosition(column, row);
@@ -71,7 +78,10 @@ public class UI {
 		System.out.println("Turn: " + chessMatch.getTurn());
 		if (chessMatch.getCheckMate()) {
 			System.out.println("CHECKMATE!");
-			System.out.println("Winner: " + chessMatch.getCurrentPlayer());
+			System.out.println("Winner: " + chessMatch.getWinner());
+		} else if (chessMatch.getResigned()) {
+			System.out.println(chessMatch.getCurrentPlayer() + " resigned.");
+			System.out.println("Winner: " + chessMatch.getWinner());
 		} else if (chessMatch.getDraw()) {
 			System.out.println("DRAW! (" + chessMatch.getDrawReason() + ")");
 		} else {

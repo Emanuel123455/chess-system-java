@@ -20,13 +20,35 @@ public class Program {
 				UI.clearScreen();
 				UI.printMatch(chessMatch);
 
-				if (chessMatch.getCheckMate() || chessMatch.getDraw()) {
+				if (chessMatch.getCheckMate() || chessMatch.getDraw() || chessMatch.getResigned()) {
 					break;
 				}
 
 				System.out.println();
+				System.out.println("(type 'resign' to give up, or 'draw' to offer a draw)");
 				System.out.print("Source: ");
-				ChessPosition source = UI.readChessPosition(sc);
+				String sourceInput = UI.readLine(sc);
+				String command = sourceInput.trim().toLowerCase();
+
+				if (command.equals("resign")) {
+					chessMatch.resign();
+					UI.clearScreen();
+					UI.printMatch(chessMatch);
+					break;
+				}
+				if (command.equals("draw")) {
+					System.out.print("Opponent, accept draw? (y/n): ");
+					String answer = UI.readLine(sc).trim().toLowerCase();
+					if (answer.equals("y") || answer.equals("yes")) {
+						chessMatch.agreeDraw();
+						UI.clearScreen();
+						UI.printMatch(chessMatch);
+						break;
+					}
+					continue;
+				}
+
+				ChessPosition source = UI.parseChessPosition(sourceInput);
 
 				boolean[][] possibleMoves = chessMatch.possibleMoves(source);
 				UI.clearScreen();

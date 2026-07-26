@@ -25,6 +25,7 @@ public class ChessMatch {
 	private boolean checkMate;
 	private boolean draw;
 	private String drawReason;
+	private boolean resigned;
 	private int halfmoveClock;
 	private ChessPiece enPassantVulnerable;
 	private ChessPiece promoted;
@@ -63,6 +64,33 @@ public class ChessMatch {
 
 	public String getDrawReason() {
 		return drawReason;
+	}
+
+	public boolean getResigned() {
+		return resigned;
+	}
+
+	// Winner of a decided game, or null while it is still going or drawn. On
+	// checkmate the winner is the side that just moved (currentPlayer, since the
+	// turn isn't passed after mate); on resignation it is the side to move's
+	// opponent, because a player resigns on their own turn.
+	public Color getWinner() {
+		if (checkMate) {
+			return currentPlayer;
+		}
+		if (resigned) {
+			return opponent(currentPlayer);
+		}
+		return null;
+	}
+
+	public void resign() {
+		resigned = true;
+	}
+
+	public void agreeDraw() {
+		draw = true;
+		drawReason = "Agreement";
 	}
 
 	public ChessPiece getEnPassantVulnerable() {
