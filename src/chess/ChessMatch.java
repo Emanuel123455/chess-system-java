@@ -143,24 +143,51 @@ public class ChessMatch {
 
 		ChessPiece movedPiece = (ChessPiece) board.piece(target);
 
-		// promotion
-		promoted = null;
-		if (movedPiece instanceof Pawn) {
-			if ((movedPiece.getColor() == Color.WHITE && target.getRow() == 0)
-					|| (movedPiece.getColor() == Color.BLACK && target.getRow() == 7)) {
-				promoted = movedPiece;
-				promoted = replacePromotedPiece("Q");
-			}
-		}
-
-		// fifty-move rule clock: a pawn move or a capture resets it, anything else
-		// counts up. capturedPiece covers en passant too (it moved a pawn anyway).
+		// These two facts depend only on the move itself, never on which piece a
+		// pawn promotes to, so they are settled here for every move.
+		// fifty-move clock: a pawn move or a capture resets it, otherwise it counts
+		// up (capturedPiece covers en passant too, it moved a pawn anyway).
 		if (movedPiece instanceof Pawn || capturedPiece != null) {
 			halfmoveClock = 0;
 		} else {
 			halfmoveClock++;
 		}
+		// en passant window: only a two-square pawn advance opens it
+		if (movedPiece instanceof Pawn
+				&& (target.getRow() == source.getRow() - 2 || target.getRow() == source.getRow() + 2)) {
+			enPassantVulnerable = movedPiece;
+		} else {
+			enPassantVulnerable = null;
+		}
 
+		// PROBLEM (promotion): a pawn's promotion piece is chosen by the player in
+		// the UI *after* this method returns (Program then calls
+		// replacePromotedPiece). Yet whether the move gives check/checkmate/
+		// stalemate, and which position is stored for threefold, all depend on that
+		// final piece. Judging the outcome here would have to assume a piece (the
+		// old code forced a Queen), so a later under-promotion left the flags wrong.
+		// SOLUTION: for a promotion, don't judge the outcome yet — flag the pawn as
+		// pending and return. concludeTurn() then runs from replacePromotedPiece,
+		// once the real piece is on the board. A normal move already has its final
+		// piece, so it is concluded right away. Move-generation and check-detection
+		// are unchanged; only *when* the outcome is evaluated moves.
+		promoted = null;
+		if (movedPiece instanceof Pawn
+				&& ((movedPiece.getColor() == Color.WHITE && target.getRow() == 0)
+						|| (movedPiece.getColor() == Color.BLACK && target.getRow() == 7))) {
+			promoted = movedPiece;
+		} else {
+			concludeTurn();
+		}
+
+		return (ChessPiece) capturedPiece;
+	}
+
+	// Evaluates the end of the turn against the position now on the board: check,
+	// checkmate/stalemate, the three positional draw rules, and passing the turn.
+	// Runs immediately for a normal move, or from replacePromotedPiece once a
+	// promoted pawn's chosen piece is in place (see the note in performChessMove).
+	private void concludeTurn() {
 		check = testCheck(opponent(currentPlayer));
 
 		if (testCheckMate(opponent(currentPlayer))) {
@@ -176,29 +203,17 @@ public class ChessMatch {
 			draw = true;
 			drawReason = "Insufficient material";
 		}
-
 		// 100 half-moves = 50 full moves by each side with no pawn move or capture
 		if (!checkMate && !draw && halfmoveClock >= 100) {
 			draw = true;
 			drawReason = "Fifty-move rule";
 		}
-
-		// threefold repetition: the same position (placement + side to move +
-		// castling rights + en passant target) reached a third time is a draw
+		// threefold repetition: same position (placement + side to move + castling
+		// rights + en passant target) reached a third time
 		if (!checkMate && !draw && recordPosition() >= 3) {
 			draw = true;
 			drawReason = "Threefold repetition";
 		}
-
-		// en passant vulnerability: only a two-square pawn advance opens the window
-		if (movedPiece instanceof Pawn
-				&& (target.getRow() == source.getRow() - 2 || target.getRow() == source.getRow() + 2)) {
-			enPassantVulnerable = movedPiece;
-		} else {
-			enPassantVulnerable = null;
-		}
-
-		return (ChessPiece) capturedPiece;
 	}
 
 	public ChessPiece replacePromotedPiece(String type) {
@@ -217,11 +232,11 @@ public class ChessMatch {
 		board.placePiece(newPiece, pos);
 		piecesOnTheBoard.add(newPiece);
 
-		// performChessMove auto-promotes to Queen just to compute check/checkmate
-		// before the player is asked what they actually want; now that their real
-		// choice is on the board, refresh the check flag so it isn't stale (e.g. a
-		// Queen giving check on the back rank while a Knight, chosen instead, would not).
-		check = testCheck(opponent(newPiece.getColor()));
+		// The player's real piece is on the board now, so evaluate the end of the
+		// turn against it. This is the deferred half of the promotion handling in
+		// performChessMove: doing it here, instead of on an assumed Queen, is what
+		// makes check/checkmate/stalemate/draw/threefold correct for any choice.
+		concludeTurn();
 
 		return newPiece;
 	}
