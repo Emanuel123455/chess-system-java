@@ -11,6 +11,7 @@ import chess.ChessPosition;
 public class Program {
 
 	public static void main(String[] args) {
+		WindowsAnsi.enable();
 		Scanner sc = new Scanner(System.in);
 		ChessMatch chessMatch = new ChessMatch();
 

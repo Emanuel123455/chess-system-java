@@ -44,8 +44,15 @@ daquela peça **destacados em azul**, antes de você confirmar o destino.
 
 ### O tabuleiro
 
-- Peças **brancas**: letra sem cor. Peças **pretas**: letra em **amarelo**.
-- Letras das peças: `K` Rei, `Q` Dama, `R` Torre, `B` Bispo, `N` Cavalo, `P` Peão.
+- Cada **tipo** de peça tem uma cor própria:
+  - `K` Rei — **vermelho**
+  - `Q` Dama — **magenta**
+  - `R` Torre — **azul**
+  - `B` Bispo — **verde**
+  - `N` Cavalo — **ciano**
+  - `P` Peão — **cinza**
+- O **lado** é dado pela caixa da letra: **MAIÚSCULA = brancas** (e em negrito),
+  **minúscula = pretas**. Ex.: `R` é torre branca, `r` é torre preta.
 - `-` é casa vazia.
 - Embaixo do tabuleiro aparecem as peças já capturadas de cada lado.
 - No topo: de quem é a vez (`Waiting player`) e o número do turno.

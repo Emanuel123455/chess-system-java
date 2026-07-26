@@ -1,0 +1,2 @@
+Main-Class: application.Program
+Enable-Native-Access: ALL-UNNAMED

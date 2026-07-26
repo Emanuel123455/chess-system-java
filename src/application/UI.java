@@ -19,8 +19,18 @@ public class UI {
 	private static final char ESC = (char) 27;
 
 	public static final String ANSI_RESET = ESC + "[0m";
-	public static final String ANSI_YELLOW = ESC + "[33m";
+	public static final String ANSI_BOLD = ESC + "[1m";
 	public static final String ANSI_BLUE_BACKGROUND = ESC + "[44m";
+
+	// One color per piece type; the side (white/black) is told apart by letter
+	// case (uppercase = white, lowercase = black), so color always means "which
+	// piece" and never gets confused with "which player".
+	private static final String C_PAWN = ESC + "[90m"; // gray
+	private static final String C_ROOK = ESC + "[94m"; // blue
+	private static final String C_KNIGHT = ESC + "[96m"; // cyan
+	private static final String C_BISHOP = ESC + "[92m"; // green
+	private static final String C_QUEEN = ESC + "[95m"; // magenta
+	private static final String C_KING = ESC + "[91m"; // red
 
 	// https://stackoverflow.com/questions/2979383/java-clear-the-console
 	public static void clearScreen() {
@@ -102,12 +112,33 @@ public class UI {
 		if (piece == null) {
 			System.out.print("-" + ANSI_RESET);
 		} else {
+			String letter = piece.toString();
+			String color = colorForPiece(letter);
 			if (piece.getColor() == Color.WHITE) {
-				System.out.print(piece + ANSI_RESET);
+				System.out.print(ANSI_BOLD + color + letter + ANSI_RESET);
 			} else {
-				System.out.print(ANSI_YELLOW + piece + ANSI_RESET);
+				System.out.print(color + letter.toLowerCase() + ANSI_RESET);
 			}
 		}
 		System.out.print(" ");
+	}
+
+	private static String colorForPiece(String letter) {
+		switch (letter) {
+			case "P":
+				return C_PAWN;
+			case "R":
+				return C_ROOK;
+			case "N":
+				return C_KNIGHT;
+			case "B":
+				return C_BISHOP;
+			case "Q":
+				return C_QUEEN;
+			case "K":
+				return C_KING;
+			default:
+				return ANSI_RESET;
+		}
 	}
 }
