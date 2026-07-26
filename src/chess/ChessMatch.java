@@ -23,6 +23,7 @@ public class ChessMatch {
 	private boolean checkMate;
 	private boolean draw;
 	private String drawReason;
+	private int halfmoveClock;
 	private ChessPiece enPassantVulnerable;
 	private ChessPiece promoted;
 
@@ -120,6 +121,14 @@ public class ChessMatch {
 			}
 		}
 
+		// fifty-move rule clock: a pawn move or a capture resets it, anything else
+		// counts up. capturedPiece covers en passant too (it moved a pawn anyway).
+		if (movedPiece instanceof Pawn || capturedPiece != null) {
+			halfmoveClock = 0;
+		} else {
+			halfmoveClock++;
+		}
+
 		check = testCheck(opponent(currentPlayer));
 
 		if (testCheckMate(opponent(currentPlayer))) {
@@ -134,6 +143,12 @@ public class ChessMatch {
 		if (!checkMate && !draw && insufficientMaterial()) {
 			draw = true;
 			drawReason = "Insufficient material";
+		}
+
+		// 100 half-moves = 50 full moves by each side with no pawn move or capture
+		if (!checkMate && !draw && halfmoveClock >= 100) {
+			draw = true;
+			drawReason = "Fifty-move rule";
 		}
 
 		// en passant vulnerability: only a two-square pawn advance opens the window
