@@ -1,7 +1,9 @@
 package chess;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import boardgame.Board;
@@ -29,12 +31,14 @@ public class ChessMatch {
 
 	private List<Piece> piecesOnTheBoard = new ArrayList<>();
 	private List<Piece> capturedPieces = new ArrayList<>();
+	private Map<String, Integer> positionCounts = new HashMap<>();
 
 	public ChessMatch() {
 		board = new Board(8, 8);
 		turn = 1;
 		currentPlayer = Color.WHITE;
 		initialSetup();
+		recordPosition();
 	}
 
 	public int getTurn() {
@@ -149,6 +153,13 @@ public class ChessMatch {
 		if (!checkMate && !draw && halfmoveClock >= 100) {
 			draw = true;
 			drawReason = "Fifty-move rule";
+		}
+
+		// threefold repetition: the same position (placement + side to move +
+		// castling rights + en passant target) reached a third time is a draw
+		if (!checkMate && !draw && recordPosition() >= 3) {
+			draw = true;
+			drawReason = "Threefold repetition";
 		}
 
 		// en passant vulnerability: only a two-square pawn advance opens the window
@@ -433,6 +444,61 @@ public class ChessMatch {
 	private int squareParity(ChessPiece piece) {
 		Position pos = piece.getChessPosition().toPosition();
 		return (pos.getRow() + pos.getColumn()) % 2;
+	}
+
+	// Records the current position and returns how many times it has now occurred.
+	// Two positions are "the same" for the repetition rule when piece placement,
+	// side to move, castling rights and en passant target all match.
+	private int recordPosition() {
+		String key = positionKey();
+		int count = positionCounts.getOrDefault(key, 0) + 1;
+		positionCounts.put(key, count);
+		return count;
+	}
+
+	private String positionKey() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < board.getRows(); i++) {
+			for (int j = 0; j < board.getColumns(); j++) {
+				ChessPiece p = (ChessPiece) board.piece(i, j);
+				if (p == null) {
+					sb.append('.');
+				} else {
+					String letter = p.toString();
+					sb.append(p.getColor() == Color.WHITE ? letter : letter.toLowerCase());
+				}
+			}
+		}
+		sb.append('|').append(currentPlayer);
+		sb.append('|').append(castlingRights());
+		sb.append('|').append(enPassantVulnerable != null ? enPassantVulnerable.getChessPosition() : "-");
+		return sb.toString();
+	}
+
+	private String castlingRights() {
+		StringBuilder sb = new StringBuilder();
+		if (king(Color.WHITE).getMoveCount() == 0) {
+			if (unmovedRook('h', 1)) {
+				sb.append('K');
+			}
+			if (unmovedRook('a', 1)) {
+				sb.append('Q');
+			}
+		}
+		if (king(Color.BLACK).getMoveCount() == 0) {
+			if (unmovedRook('h', 8)) {
+				sb.append('k');
+			}
+			if (unmovedRook('a', 8)) {
+				sb.append('q');
+			}
+		}
+		return sb.length() == 0 ? "-" : sb.toString();
+	}
+
+	private boolean unmovedRook(char file, int rank) {
+		ChessPiece p = (ChessPiece) board.piece(new ChessPosition(file, rank).toPosition());
+		return p instanceof Rook && p.getMoveCount() == 0;
 	}
 
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
