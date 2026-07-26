@@ -18,6 +18,11 @@ public class Program {
 			try {
 				UI.clearScreen();
 				UI.printMatch(chessMatch);
+
+				if (chessMatch.getCheckMate()) {
+					break;
+				}
+
 				System.out.println();
 				System.out.print("Source: ");
 				ChessPosition source = UI.readChessPosition(sc);
