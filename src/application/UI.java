@@ -28,6 +28,15 @@ public class UI {
 		System.out.flush();
 	}
 
+	public static String readPromotionType(Scanner sc) {
+		String type = sc.nextLine().trim().toUpperCase();
+		while (!type.equals("B") && !type.equals("N") && !type.equals("R") && !type.equals("Q")) {
+			System.out.print("Invalid value! Enter piece for promotion (B/N/R/Q): ");
+			type = sc.nextLine().trim().toUpperCase();
+		}
+		return type;
+	}
+
 	public static ChessPosition readChessPosition(Scanner sc) {
 		try {
 			String s = sc.nextLine();
