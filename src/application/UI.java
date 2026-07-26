@@ -1,8 +1,44 @@
 package application;
 
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
+import chess.ChessException;
 import chess.ChessPiece;
+import chess.ChessPosition;
+import chess.Color;
 
 public class UI {
+
+	// Built from the raw ESC code point (decimal 27) instead of a string-literal
+	// escape sequence, so it never depends on how backslash escapes survive
+	// through any intermediate text-processing layer.
+	private static final char ESC = (char) 27;
+
+	public static final String ANSI_RESET = ESC + "[0m";
+	public static final String ANSI_YELLOW = ESC + "[33m";
+
+	// https://stackoverflow.com/questions/2979383/java-clear-the-console
+	public static void clearScreen() {
+		System.out.print(ESC + "[H" + ESC + "[2J");
+		System.out.flush();
+	}
+
+	public static ChessPosition readChessPosition(Scanner sc) {
+		try {
+			String s = sc.nextLine();
+			char column = s.charAt(0);
+			int row = Integer.parseInt(s.substring(1));
+			return new ChessPosition(column, row);
+		}
+		// Deliberately NOT a catch-all RuntimeException: that would also swallow
+		// Scanner's own NoSuchElementException (thrown when input is exhausted),
+		// turning an end-of-stream into an infinite non-blocking retry loop
+		// instead of letting the program terminate.
+		catch (StringIndexOutOfBoundsException | NumberFormatException | ChessException e) {
+			throw new InputMismatchException("Error reading ChessPosition. Valid values are from a1 to h8.");
+		}
+	}
 
 	public static void printBoard(ChessPiece[][] pieces) {
 		for (int i = 0; i < pieces.length; i++) {
@@ -19,7 +55,11 @@ public class UI {
 		if (piece == null) {
 			System.out.print("-");
 		} else {
-			System.out.print(piece);
+			if (piece.getColor() == Color.WHITE) {
+				System.out.print(piece);
+			} else {
+				System.out.print(ANSI_YELLOW + piece + ANSI_RESET);
+			}
 		}
 		System.out.print(" ");
 	}
