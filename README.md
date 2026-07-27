@@ -1,54 +1,54 @@
 # Chess System Java
 
-A playable, terminal-based chess game built in Java — an object-oriented programming exercise covering the full rulebook: legal move generation per piece, check/checkmate detection, and all special moves (castling, en passant, pawn promotion).
+Um jogo de **xadrez jogável no terminal**, escrito em Java — um exercício de programação orientada a objetos que cobre o regulamento completo: geração de lances legais por peça, detecção de xeque/xeque-mate e todos os lances especiais (roque, en passant, promoção de peão).
 
-> ⚠️ **Study project.** Built for **training** in object-oriented design and Java, based on the roadmap of the course *Programação Orientada a Objetos com Java* (educandoweb.com.br / Prof. Dr. Nelio Alves). The reference material documented the C# version of this project; it was rebuilt here for Java from the same checklist and verified end-to-end.
+> ⚠️ **Projeto de estudo.** Criado para **treino** de design orientado a objetos e Java, baseado no roteiro do curso *Programação Orientada a Objetos com Java* (educandoweb.com.br / Prof. Dr. Nelio Alves). O material de referência documentava a versão C# deste projeto; aqui ele foi refeito para Java a partir do mesmo checklist e verificado ponta a ponta.
 
-## 🎯 Why this project exists
+## 🎯 Por que este projeto existe
 
-Practice applying core OOP concepts to build a complete, non-trivial system from a domain model:
+Praticar a aplicação dos conceitos centrais de OO na construção de um sistema completo e não trivial a partir de um modelo de domínio:
 
-- Encapsulation, inheritance, polymorphism, abstract classes/methods
-- A **layered architecture**: a generic board-game engine (`boardgame`) underneath chess-specific rules (`chess`, `chess.pieces`), with a console UI (`application`) on top
-- Defensive programming with custom exceptions
-- A 2D-matrix board representation
-- A full game state machine: turns, check, checkmate, and every special move in chess
+- Encapsulamento, herança, polimorfismo, classes/métodos abstratos
+- Uma **arquitetura em camadas**: um motor genérico de jogo de tabuleiro (`boardgame`) por baixo das regras específicas de xadrez (`chess`, `chess.pieces`), com uma UI de console (`application`) por cima
+- Programação defensiva com exceções próprias
+- Representação do tabuleiro por matriz 2D
+- Uma máquina de estado completa: turnos, xeque, xeque-mate e todos os lances especiais do xadrez
 
-## 🗂️ Architecture
+## 🗂️ Arquitetura
 
 ```
-application/    Program (entry point + game loop), UI (console rendering)
-boardgame/      Board, Piece, Position, BoardException — generic, chess-agnostic
+application/    Program (ponto de entrada + loop do jogo), UI (renderização no console)
+boardgame/      Board, Piece, Position, BoardException — genérico, agnóstico ao xadrez
 chess/          ChessMatch, ChessPiece, ChessPosition, Color, ChessException
 chess/pieces/   King, Queen, Rook, Bishop, Knight, Pawn
 ```
 
-No framework, no build tool — plain Java, compiled directly with `javac`.
+Sem framework, sem ferramenta de build — Java puro, compilado direto com `javac`.
 
-## ✅ Features
+## ✅ Funcionalidades
 
-- Full standard 32-piece starting position
-- Legal move calculation per piece (straight lines, diagonals, knight jumps, pawn pushes/captures)
-- Turn enforcement ("the chosen piece is not yours")
-- Check and checkmate detection, including "you can't put yourself in check"
-- Captured-pieces tracking, shown by color
-- Special moves: **castling** (respecting all conditions — can't castle out of, through, or into check), **en passant**, **pawn promotion** (choose Bishop/Knight/Rook/Queen)
-- **All draw conditions**: stalemate, insufficient material (dead position), threefold repetition, and the fifty-move rule
-- **Resign** and **draw-by-agreement** commands
-- Per-piece-type colors (king red, queen magenta, rook blue, bishop green, knight cyan, pawn gray) with side shown by letter case, plus move highlighting
-- Clean exception handling — invalid input never crashes the game
+- Posição inicial padrão completa, com 32 peças
+- Cálculo de lances legais por peça (linhas retas, diagonais, saltos do cavalo, avanços/capturas do peão)
+- Controle de turno ("a peça escolhida não é sua")
+- Detecção de xeque e xeque-mate, incluindo "você não pode se colocar em xeque"
+- Registro de peças capturadas, mostradas por cor
+- Lances especiais: **roque** (respeitando todas as condições — não pode rocar em xeque, atravessando casa atacada, nem para dentro de xeque), **en passant**, **promoção de peão** (escolha Bispo/Cavalo/Torre/Dama)
+- **Todas as condições de empate**: afogamento (stalemate), material insuficiente (dead position), repetição tripla e regra dos 50 lances
+- Comandos de **desistência** (`resign`) e **empate por acordo** (`draw`)
+- Cores por tipo de peça (rei vermelho, dama magenta, torre azul, bispo verde, cavalo ciano, peão cinza), com o lado indicado pela caixa da letra, além do destaque dos lances possíveis
+- Tratamento de exceções limpo — entrada inválida nunca derruba o jogo
 
-## ▶️ How to run
+## ▶️ Como rodar
 
-Requires a JRE (Java 17+).
+Requer um JRE (Java 17+).
 
-**Option 1 — the executable jar** (no compilation needed):
+**Opção 1 — o jar executável** (sem precisar compilar):
 
 ```bash
 java -jar chess-system-java.jar
 ```
 
-**Option 2 — compile from source:**
+**Opção 2 — compilar a partir do código-fonte:**
 
 ```bash
 # Linux/Mac
@@ -62,25 +62,27 @@ javac -d bin (Get-ChildItem -Recurse -Filter *.java src | % FullName)
 java -cp bin application.Program
 ```
 
-## 🎮 How to play
+## 🎮 Como jogar
 
-Each turn: type the **source** square, then the **target** square, in algebraic notation (e.g. `e2`, then `e4`). The board reprints with the piece's legal destinations highlighted before you confirm the target.
+A cada turno: digite a casa de **origem** e depois a casa de **destino**, em notação algébrica (ex.: `e2`, depois `e4`). O tabuleiro é reimpresso com os destinos legais da peça destacados antes de você confirmar o destino.
 
-- **Castling**: move the king two squares toward the rook (e.g. `e1` → `g1`).
-- **En passant**: capture diagonally onto the empty square behind an opponent pawn that just advanced two squares.
-- **Promotion**: when a pawn reaches the last rank, you'll be prompted to choose `B`/`N`/`R`/`Q`.
+- **Roque**: mova o rei duas casas em direção à torre (ex.: `e1` → `g1`).
+- **En passant**: capture na diagonal, na casa vazia atrás de um peão adversário que acabou de avançar duas casas.
+- **Promoção**: quando um peão chega à última linha, o jogo pergunta qual peça você quer — `B`/`N`/`R`/`Q`.
 
-## 🚀 Possible future improvements
+Veja também [COMO-JOGAR.md](COMO-JOGAR.md) para o guia detalhado em português.
 
-Ideas for extending this beyond the training scope:
+## 🚀 Possíveis melhorias futuras
 
-- Move history / algebraic notation log (PGN export)
-- A simple AI opponent (minimax + evaluation function)
-- Graphical UI (JavaFX/Swing) instead of the console
-- Save/load game state
-- Network play (two players over sockets)
-- Dedicated unit tests for each piece's move generation
+Ideias para estender além do escopo de estudo:
 
-## 📚 Credits
+- Histórico de lances / log em notação algébrica (exportação PGN)
+- Um oponente com IA simples (minimax + função de avaliação)
+- Interface gráfica (JavaFX/Swing) em vez do console
+- Salvar/carregar o estado do jogo
+- Jogo em rede (dois jogadores por sockets)
+- Testes unitários dedicados para a geração de lances de cada peça
 
-Study project based on the course **Programação Orientada a Objetos com Java** — educandoweb.com.br / Prof. Dr. Nelio Alves. Rebuilt for Java from the course checklist, adapted, and verified end-to-end as a learning exercise.
+## 📚 Créditos
+
+Projeto de estudo baseado no curso **Programação Orientada a Objetos com Java** — educandoweb.com.br / Prof. Dr. Nelio Alves. Refeito para Java a partir do checklist do curso, adaptado e verificado ponta a ponta como exercício de aprendizado.
